@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AI Data Analyst"
+version = "1.0.0"
+id = "artifacts/data-analyst"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25676
+
+[services.development]
+run = "pnpm --filter @workspace/data-analyst run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/data-analyst", "run", "build" ]
+publicDir = "artifacts/data-analyst/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25676"
+BASE_PATH = "/"

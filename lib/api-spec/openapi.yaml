@@ -1,22 +1,28 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AI Data Analyst API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: datasets
+    description: Dataset upload and management
+  - name: analysis
+    description: Dataset analysis and charts
+  - name: chat
+    description: AI chat with data
+  - name: reports
+    description: Report generation
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +30,475 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /datasets:
+    get:
+      operationId: listDatasets
+      tags: [datasets]
+      summary: List all uploaded datasets
+      responses:
+        "200":
+          description: List of datasets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dataset"
+
+  /datasets/{id}:
+    get:
+      operationId: getDataset
+      tags: [datasets]
+      summary: Get dataset metadata and overview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dataset details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetDetail"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteDataset
+      tags: [datasets]
+      summary: Delete a dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+
+  /datasets/{id}/overview:
+    get:
+      operationId: getDatasetOverview
+      tags: [analysis]
+      summary: Get statistical overview of the dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dataset overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetOverview"
+
+  /datasets/{id}/charts:
+    get:
+      operationId: getDatasetCharts
+      tags: [analysis]
+      summary: Get auto-generated charts for the dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of chart configs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChartConfig"
+
+  /datasets/{id}/kpis:
+    get:
+      operationId: getDatasetKpis
+      tags: [analysis]
+      summary: Get KPI metrics for the dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: KPI metrics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/KpiMetric"
+
+  /datasets/{id}/insights:
+    get:
+      operationId: getDatasetInsights
+      tags: [analysis]
+      summary: Get AI-generated insights for the dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: AI insights
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightsResult"
+
+  /datasets/{id}/chat:
+    post:
+      operationId: chatWithDataset
+      tags: [chat]
+      summary: Ask a question about the dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+
+  /datasets/{id}/chat/history:
+    get:
+      operationId: getChatHistory
+      tags: [chat]
+      summary: Get chat history for a dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+    delete:
+      operationId: clearChatHistory
+      tags: [chat]
+      summary: Clear chat history for a dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cleared
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+
+  /datasets/{id}/report:
+    post:
+      operationId: generateReport
+      tags: [reports]
+      summary: Generate a PDF report for the dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportInput"
+      responses:
+        "200":
+          description: Report generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportResult"
+
+  /reports:
+    get:
+      operationId: listReports
+      tags: [reports]
+      summary: List all generated reports
+      responses:
+        "200":
+          description: List of reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReportMeta"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Dataset:
+      type: object
+      required: [id, name, filename, rowCount, columnCount, uploadedAt, fileSize]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        filename:
+          type: string
+        rowCount:
+          type: integer
+        columnCount:
+          type: integer
+        uploadedAt:
+          type: string
+        fileSize:
+          type: integer
+
+    DatasetDetail:
+      type: object
+      required: [id, name, filename, rowCount, columnCount, uploadedAt, fileSize, columns]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        filename:
+          type: string
+        rowCount:
+          type: integer
+        columnCount:
+          type: integer
+        uploadedAt:
+          type: string
+        fileSize:
+          type: integer
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/ColumnInfo"
+        previewRows:
+          type: array
+          items:
+            type: object
+
+    ColumnInfo:
+      type: object
+      required: [name, dtype, nullCount, uniqueCount]
+      properties:
+        name:
+          type: string
+        dtype:
+          type: string
+        nullCount:
+          type: integer
+        uniqueCount:
+          type: integer
+        min:
+          type: ["string", "null"]
+        max:
+          type: ["string", "null"]
+        mean:
+          type: ["number", "null"]
+        std:
+          type: ["number", "null"]
+
+    DatasetOverview:
+      type: object
+      required: [rowCount, columnCount, missingCells, duplicateRows, numericColumns, categoricalColumns, columns]
+      properties:
+        rowCount:
+          type: integer
+        columnCount:
+          type: integer
+        missingCells:
+          type: integer
+        missingPercent:
+          type: number
+        duplicateRows:
+          type: integer
+        numericColumns:
+          type: integer
+        categoricalColumns:
+          type: integer
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/ColumnInfo"
+
+    ChartConfig:
+      type: object
+      required: [id, title, chartType, xAxis, yAxis, data]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        chartType:
+          type: string
+        xAxis:
+          type: string
+        yAxis:
+          type: string
+        description:
+          type: ["string", "null"]
+        data:
+          type: array
+          items:
+            type: object
+
+    KpiMetric:
+      type: object
+      required: [id, label, value, column]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        value:
+          type: string
+        column:
+          type: string
+        change:
+          type: ["number", "null"]
+        trend:
+          type: ["string", "null"]
+
+    InsightsResult:
+      type: object
+      required: [insights, generatedAt]
+      properties:
+        insights:
+          type: string
+        generatedAt:
+          type: string
+        keyFindings:
+          type: array
+          items:
+            type: string
+
+    ChatMessageInput:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    ChatMessage:
+      type: object
+      required: [id, role, content, createdAt]
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+
+    ChatResponse:
+      type: object
+      required: [id, role, content, createdAt]
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+
+    ReportInput:
+      type: object
+      properties:
+        title:
+          type: string
+        includeCharts:
+          type: boolean
+        includeInsights:
+          type: boolean
+        includeKpis:
+          type: boolean
+
+    ReportResult:
+      type: object
+      required: [id, datasetId, title, createdAt, downloadUrl]
+      properties:
+        id:
+          type: string
+        datasetId:
+          type: string
+        title:
+          type: string
+        createdAt:
+          type: string
+        downloadUrl:
+          type: string
+
+    ReportMeta:
+      type: object
+      required: [id, datasetId, datasetName, title, createdAt, downloadUrl]
+      properties:
+        id:
+          type: string
+        datasetId:
+          type: string
+        datasetName:
+          type: string
+        title:
+          type: string
+        createdAt:
+          type: string
+        downloadUrl:
+          type: string
+
+    DeleteResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: ["string", "null"]
