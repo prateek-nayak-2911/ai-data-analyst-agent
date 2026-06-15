@@ -1,11 +1,16 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/contexts/auth-context";
 import { Layout } from "@/components/layout";
+import { ProtectedRoute } from "@/components/protected-route";
 import NotFound from "@/pages/not-found";
 
+import LoginPage from "@/pages/login";
+import SignupPage from "@/pages/signup";
+import DashboardPage from "@/pages/dashboard";
 import UploadPage from "@/pages/upload";
 import AnalysisPage from "@/pages/analysis";
 import ChatPage from "@/pages/chat";
@@ -20,17 +25,56 @@ const queryClient = new QueryClient({
   },
 });
 
-function Router() {
+function AppRoutes() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={UploadPage} />
-        <Route path="/analysis/:id" component={AnalysisPage} />
-        <Route path="/chat/:id" component={ChatPage} />
-        <Route path="/reports" component={ReportsPage} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      {/* Public auth routes */}
+      <Route path="/login" component={LoginPage} />
+      <Route path="/signup" component={SignupPage} />
+
+      {/* Protected app routes wrapped in Layout */}
+      <Route path="/dashboard">
+        <ProtectedRoute>
+          <Layout>
+            <DashboardPage />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/">
+        <ProtectedRoute>
+          <Layout>
+            <UploadPage />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/analysis/:id">
+        {(params) => (
+          <ProtectedRoute>
+            <Layout>
+              <AnalysisPage />
+            </Layout>
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/chat/:id">
+        {(params) => (
+          <ProtectedRoute>
+            <Layout>
+              <ChatPage />
+            </Layout>
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/reports">
+        <ProtectedRoute>
+          <Layout>
+            <ReportsPage />
+          </Layout>
+        </ProtectedRoute>
+      </Route>
+
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
@@ -38,12 +82,14 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="data-agent-theme">
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <AppRoutes />
+            </WouterRouter>
+            <Toaster />
+          </TooltipProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

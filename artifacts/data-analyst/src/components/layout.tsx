@@ -7,21 +7,35 @@ import {
   FileText, 
   Moon, 
   Sun,
-  Database
+  Database,
+  LayoutDashboard,
+  LogOut
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/auth-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { theme, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
 
-  // Extract ID from /analysis/:id or /chat/:id
   const match = location.match(/\/(analysis|chat)\/([^\/]+)/);
   const currentDatasetId = match ? match[2] : null;
 
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const initials = displayName.slice(0, 2).toUpperCase();
+
   const navItems = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/", label: "Upload & Datasets", icon: Upload },
     { 
       href: currentDatasetId ? `/analysis/${currentDatasetId}` : "#", 
@@ -49,7 +63,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+              const isActive = 
+                item.href === "/"
+                  ? location === "/"
+                  : item.href !== "#" && (location === item.href || location.startsWith(item.href));
               
               if (item.disabled) {
                 return (
@@ -76,7 +93,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
         </div>
-        <div className="p-4 border-t border-sidebar-border">
+
+        <div className="p-4 border-t border-sidebar-border space-y-1">
           <Button 
             variant="ghost" 
             size="sm" 
@@ -86,6 +104,35 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
           </Button>
+
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-auto py-2">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                    {initials}
+                  </div>
+                  <div className="flex flex-col items-start min-w-0 flex-1">
+                    <span className="text-xs font-medium truncate w-full text-left">{displayName}</span>
+                    <span className="text-[10px] text-muted-foreground truncate w-full text-left">{user.email}</span>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" align="start" className="w-52">
+                <Link href="/dashboard">
+                  <DropdownMenuItem className="cursor-pointer gap-2">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut} className="cursor-pointer gap-2 text-destructive focus:text-destructive">
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </aside>
       <main className="flex-1 flex flex-col h-full relative overflow-hidden">
