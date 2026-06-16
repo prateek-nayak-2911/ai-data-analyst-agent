@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
-from routers import datasets, analysis, chat, reports
+from routers import datasets, analysis, chat, reports, advanced
 
 UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "/tmp/data_analyst_uploads")
 REPORTS_DIR = os.environ.get("REPORTS_DIR", "/tmp/data_analyst_reports")
@@ -33,6 +33,7 @@ app.include_router(datasets.router, prefix="/api", tags=["datasets"])
 app.include_router(analysis.router, prefix="/api", tags=["analysis"])
 app.include_router(chat.router, prefix="/api", tags=["chat"])
 app.include_router(reports.router, prefix="/api", tags=["reports"])
+app.include_router(advanced.router, prefix="/api", tags=["advanced"])
 
 os.makedirs(REPORTS_DIR, exist_ok=True)
 app.mount("/api/reports/files", StaticFiles(directory=REPORTS_DIR), name="reports_files")

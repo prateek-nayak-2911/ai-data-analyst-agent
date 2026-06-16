@@ -15,6 +15,7 @@ import UploadPage from "@/pages/upload";
 import AnalysisPage from "@/pages/analysis";
 import ChatPage from "@/pages/chat";
 import ReportsPage from "@/pages/reports";
+import AdvancedPage from "@/pages/advanced";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,6 +62,15 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <ChatPage />
+            </Layout>
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/advanced/:id">
+        {(params) => (
+          <ProtectedRoute>
+            <Layout>
+              <AdvancedPage />
             </Layout>
           </ProtectedRoute>
         )}

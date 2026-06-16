@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Loader2, TrendingUp, TrendingDown, Minus, ArrowLeft, BrainCircuit, 
-  TableProperties, BarChart3, Target, Lightbulb
+  TableProperties, BarChart3, Target, Lightbulb, Zap
 } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, ScatterChart, Scatter,
@@ -152,6 +152,11 @@ export default function AnalysisPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Link href={`/advanced/${id}`}>
+            <Button variant="outline">
+              <Zap className="w-4 h-4 mr-2" /> Advanced Analytics
+            </Button>
+          </Link>
           <Link href={`/chat/${id}`}>
             <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <BrainCircuit className="w-4 h-4 mr-2" /> Ask AI

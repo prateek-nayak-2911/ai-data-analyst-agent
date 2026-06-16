@@ -9,7 +9,8 @@ import {
   Sun,
   Database,
   LayoutDashboard,
-  LogOut
+  LogOut,
+  Zap
 } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
@@ -28,7 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
 
-  const match = location.match(/\/(analysis|chat)\/([^\/]+)/);
+  const match = location.match(/\/(analysis|chat|advanced)\/([^\/]+)/);
   const currentDatasetId = match ? match[2] : null;
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
@@ -47,6 +48,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       href: currentDatasetId ? `/chat/${currentDatasetId}` : "#", 
       label: "AI Chat", 
       icon: MessageSquare,
+      disabled: !currentDatasetId
+    },
+    { 
+      href: currentDatasetId ? `/advanced/${currentDatasetId}` : "#", 
+      label: "Advanced Analytics", 
+      icon: Zap,
       disabled: !currentDatasetId
     },
     { href: "/reports", label: "Reports", icon: FileText },
